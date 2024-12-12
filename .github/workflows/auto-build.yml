@@ -1,10 +1,11 @@
 name: Automatic check update and Build
 on:
-  # # 取消注释以启用自动激活
-  # # Uncomment it to make this workflow automatic
-  # schedule:
-  #   - cron: '0 0 * * *'
-  workflow_dispatch:
+    schedule:
+    - cron: '0 0 * * *'
+
+    push:
+      path:
+        - "**"
 
 jobs:
 
@@ -15,8 +16,8 @@ jobs:
       tag: ${{ steps.target-tag.outputs.tag }}
     steps:
     - uses: actions/checkout@v2
-    
-    - name: 获取最后的tags 
+
+    - name: 获取最后的tags
       id: target-tag
       run: |
         tag=$(curl -s https://api.github.com/repos/aseprite/aseprite/tags | jq -r '.[0].name')
@@ -63,11 +64,11 @@ jobs:
       shell: bash
       run: |
         body=$(curl -s https://api.github.com/repos/aseprite/aseprite/releases/tags/${{ needs.check.outputs.tag }} | jq -r '.body')
-        echo "body-content=$(echo $body)" >> $GITHUB_OUTPUT 
+        echo "body-content=$(echo $body)" >> $GITHUB_OUTPUT
         echo $body
         GITHUB_REPOSITORY="${{ github.repository }}"
         REPO_NAME="${GITHUB_REPOSITORY#${{ github.repository_owner }}/}"
-        echo "repo-name=$(echo $REPO_NAME)" >> $GITHUB_OUTPUT 
+        echo "repo-name=$(echo $REPO_NAME)" >> $GITHUB_OUTPUT
         echo $REPO_NAME
 
     - uses: actions/checkout@v3
@@ -102,9 +103,9 @@ jobs:
       shell: bash
       run: |
         cd build && ninja
-    
+
     - name: 获取 "libcrypto-1_1-x64.dll"
-      shell: bash 
+      shell: bash
       run: |
         GITHUB_REPOSITORY="${{ github.repository }}"
         REPO_NAME="${GITHUB_REPOSITORY#${{ github.repository_owner }}/}"
@@ -115,7 +116,7 @@ jobs:
     # - name: 上传文件到 artifact
     #   uses: actions/upload-artifact@v3
     #   with:
-    #     name: aseprite 
+    #     name: aseprite
     #     path: |
     #       REPO_NAME=${{ steps.get-content.outputs.repo-name }}
 
